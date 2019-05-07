@@ -28,9 +28,11 @@ namespace Ludo_MasterServer
             l_message.Build(MessageType.loginFailed);
             return l_message;
         }
-        public static NetworkMessage StartNewMatch(List<GameServer.PlayerInfo> clientList)
+        public static NetworkMessage StartNewMatch(int idGame, List<GameServer.PlayerInfo> clientList)
         {
             NetworkMessage l_message = new NetworkMessage();
+
+            l_message.Write(idGame);
             for (int i = 0; i < clientList.Count; i++)
             {
                 l_message.Write(clientList[i].m_id);
@@ -50,6 +52,21 @@ namespace Ludo_MasterServer
             l_message.Write((int)turnColor);
             l_message.Write(clientTurn);
             l_message.Build(MessageType.changeTurn);
+            return l_message;
+        }
+
+        public static NetworkMessage RollDice(int result)
+        {
+            NetworkMessage l_message = new NetworkMessage();
+            l_message.Write(result);
+            l_message.Build(MessageType.rollDice);
+            return l_message;
+        }
+
+        public static NetworkMessage ChoosePiece()
+        {
+            NetworkMessage l_message = new NetworkMessage();
+            l_message.Build(MessageType.choosePiece);
             return l_message;
         }
     }

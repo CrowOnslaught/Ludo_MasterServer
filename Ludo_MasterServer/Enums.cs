@@ -17,9 +17,11 @@ namespace Ludo_MasterServer
             logIn = 0x02,
             joinNewGame = 0x03,
             startNewGame = 0x04,
-            loginFailed= 0x05,
-            changeTurn=0x06,
-            movePiece= 0x07,
+            loginFailed = 0x05,
+            changeTurn =0x06,
+            movePiece = 0x07,
+            rollDice = 0x08,
+            choosePiece = 0x09,
         }
     }
 }

@@ -18,7 +18,8 @@ namespace Ludo_MasterServer
             m_enqueuedClients.Enqueue(c);
             if (m_enqueuedClients.Count >= 4)
             {
-                GameServer l_gameServer = new GameServer();
+                int l_roomID = m_gameServersPerID.Count;
+                GameServer l_gameServer = new GameServer(l_roomID);
                 for (int i = 0; i < 4; i++)
                 {
                     Client l_client = m_enqueuedClients.Dequeue();
@@ -26,10 +27,19 @@ namespace Ludo_MasterServer
                     l_gameServer.m_clientList.Add(l_client);
                 }
 
-                m_gameServersPerID.Add(m_gameServersPerID.Count, l_gameServer);
+                m_gameServersPerID.Add(l_roomID, l_gameServer);
 
                 l_gameServer.SetUp();
             }
+        }
+
+        public void OnClientRollDice(Client c, int roomID)
+        {
+            m_gameServersPerID[roomID].OnRollDice(c);
+        }
+        public void OnClientSelectPiece(Client c, int roomID, int tileID)
+        {
+            m_gameServersPerID[roomID].OnSelectPiece(c, tileID);
         }
     }
 

@@ -97,6 +97,12 @@ namespace Ludo_MasterServer
                     Program.m_gameManager.EnqueueClient(this);
                     Console.WriteLine("Client Enqueued! Current Clients in queue: {0}", Program.m_gameManager.m_enqueuedClients.Count);
                     break;
+                case MessageType.rollDice:
+                    Program.m_gameManager.OnClientRollDice(this, message.ReadInt());
+                    break;
+                case MessageType.choosePiece:
+                    Program.m_gameManager.OnClientSelectPiece(this, message.ReadInt(), message.ReadInt());
+                    break;
                 default:
                     Console.WriteLine("Error 002: Unknown type of Message");
                     break;
