@@ -1,0 +1,17 @@
+D:\Ludo-MasterServer\Ludo_MasterServer\Ludo_MasterServer\bin\Debug\Ludo_MasterServer.exe.config
+D:\Ludo-MasterServer\Ludo_MasterServer\Ludo_MasterServer\bin\Debug\Ludo_MasterServer.exe
+D:\Ludo-MasterServer\Ludo_MasterServer\Ludo_MasterServer\bin\Debug\Ludo_MasterServer.pdb
+D:\Ludo-MasterServer\Ludo_MasterServer\Ludo_MasterServer\obj\Debug\Ludo_MasterServer.csprojAssemblyReference.cache
+D:\Ludo-MasterServer\Ludo_MasterServer\Ludo_MasterServer\obj\Debug\Ludo_MasterServer.csproj.CoreCompileInputs.cache
+D:\Ludo-MasterServer\Ludo_MasterServer\Ludo_MasterServer\obj\Debug\Ludo_MasterServer.exe
+D:\Ludo-MasterServer\Ludo_MasterServer\Ludo_MasterServer\obj\Debug\Ludo_MasterServer.pdb
+D:\Ludo-MasterServer\Ludo_MasterServer\Ludo_MasterServer\bin\Debug\EntityFramework.dll
+D:\Ludo-MasterServer\Ludo_MasterServer\Ludo_MasterServer\bin\Debug\EntityFramework.SqlServer.dll
+D:\Ludo-MasterServer\Ludo_MasterServer\Ludo_MasterServer\bin\Debug\System.Data.SQLite.dll
+D:\Ludo-MasterServer\Ludo_MasterServer\Ludo_MasterServer\bin\Debug\System.Data.SQLite.EF6.dll
+D:\Ludo-MasterServer\Ludo_MasterServer\Ludo_MasterServer\bin\Debug\System.Data.SQLite.Linq.dll
+D:\Ludo-MasterServer\Ludo_MasterServer\Ludo_MasterServer\bin\Debug\EntityFramework.xml
+D:\Ludo-MasterServer\Ludo_MasterServer\Ludo_MasterServer\bin\Debug\EntityFramework.SqlServer.xml
+D:\Ludo-MasterServer\Ludo_MasterServer\Ludo_MasterServer\bin\Debug\System.Data.SQLite.xml
+D:\Ludo-MasterServer\Ludo_MasterServer\Ludo_MasterServer\bin\Debug\System.Data.SQLite.dll.config
+D:\Ludo-MasterServer\Ludo_MasterServer\Ludo_MasterServer\obj\Debug\Ludo_MasterServer.csproj.CopyComplete
