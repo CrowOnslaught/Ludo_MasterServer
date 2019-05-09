@@ -87,15 +87,16 @@ namespace Ludo_MasterServer
                          l_message = MessageConstructor.LogInFailed();
                         Console.WriteLine("User LogIn Failed| Name: {0}|Pass: {1}", l_name, l_pass);
                     }
-
                     Send(l_message);
-
                     break;
                 case MessageType.ping:
                     break;
                 case MessageType.joinNewGame:
                     Program.m_gameManager.EnqueueClient(this);
                     Console.WriteLine("Client Enqueued! Current Clients in queue: {0}", Program.m_gameManager.m_enqueuedClients.Count);
+                    break;
+                case MessageType.quitQueue:
+                    Program.m_gameManager.DequeueClient(this);
                     break;
                 case MessageType.rollDice:
                     Program.m_gameManager.OnClientRollDice(this, message.ReadInt());
@@ -132,6 +133,7 @@ namespace Ludo_MasterServer
 
         private void Close()
         {
+            Program.m_gameManager.DequeueClient(this);
             Program.m_server.Leave(this);
             m_tcpClient.Close();
         }

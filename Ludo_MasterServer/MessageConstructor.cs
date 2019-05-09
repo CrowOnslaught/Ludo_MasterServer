@@ -69,5 +69,16 @@ namespace Ludo_MasterServer
             l_message.Build(MessageType.choosePiece);
             return l_message;
         }
+
+        public static NetworkMessage MovePiece(Colors color, int originID, int destID)
+        {
+            NetworkMessage l_message = new NetworkMessage();
+            l_message.Write((int)color);
+            l_message.Write(originID);
+            l_message.Write(destID);
+
+            l_message.Build(MessageType.movePiece);
+            return l_message;
+        }
     }
 }
