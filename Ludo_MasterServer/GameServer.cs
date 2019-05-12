@@ -105,7 +105,7 @@ namespace Ludo_MasterServer
         public void OnRollDice(Client client)
         {
             Random l_random = new Random();
-            int l_rollResult = l_random.Next(7);
+            int l_rollResult = l_random.Next(1,7);
 
             m_playersPerID[client.m_id].m_rollResults.Add(l_rollResult);
 
@@ -151,26 +151,20 @@ namespace Ludo_MasterServer
             }
             else //Normal Roll
             {
-                for (int i = originID+1; i <= originID + l_rollResult; i++)
+                for (int i = originID+1; i <= originID + l_rollResult; i++) // Check for tiles in movement range
                 {
                     TileInfo l_tile = GetTileByColorAndID(l_color, i);
-                    if (l_tile.m_currentPieces.Count >= 2)
+                    if (l_tile.m_currentPieces.Count >= 2) // If tile is full
                     {
-                        if (i > originID + 1)
-                        {
-                            l_destID = i-1;
-                            MovePiece(currentTurnClient, l_color, originID, l_destID);
-                            break;
-                        }
-                        else
-                        {
-                            currentTurnClient.Send(l_message2);
-                            return;
-                        }
+                        //Block path
+                        l_destID = i-1;
+                        MovePiece(currentTurnClient, l_color, originID, l_destID);
+                        break;
+ 
                     }
                     else
                     {
-                        if (i == (originID + l_rollResult))
+                        if (i == (originID + l_rollResult)) // if tile is the last tile to check
                         {
                             l_destID = originID + l_rollResult;
 

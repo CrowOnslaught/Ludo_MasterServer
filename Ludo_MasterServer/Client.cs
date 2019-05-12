@@ -56,6 +56,7 @@ namespace Ludo_MasterServer
                 Array.Copy(message.m_raw, 0, l_messageResult, 4, message.m_raw.Length);
 
                 m_clientStream.Write(l_messageResult,0, l_messageResult.Length);
+                Console.WriteLine("{0} Mensage sent to {1} with ID {2}", message.m_type, this.m_name, this.m_id);
             }
             catch
             {
