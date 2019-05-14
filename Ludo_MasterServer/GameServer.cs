@@ -107,7 +107,8 @@ namespace Ludo_MasterServer
             Random l_random = new Random();
             int l_rollResult = l_random.Next(1,7);
 
-            m_playersPerID[client.m_id].m_rollResults.Add(l_rollResult);
+            PlayerInfo l_player = m_playersPerID[client.m_id];
+            l_player.m_rollResults.Add(l_rollResult);
 
             NetworkMessage l_message = MessageConstructor.RollDice(l_rollResult);
             for (int i = 0; i < m_clientList.Count; i++)
@@ -115,7 +116,18 @@ namespace Ludo_MasterServer
                     m_clientList[i].Send(l_message);
 
             NetworkMessage l_message2 = MessageConstructor.ChoosePiece();
-            client.Send(l_message2);
+            if (l_rollResult != 5)
+            {
+                int l_homeTilePieces = GetTileByColorAndID(l_player.m_color, 0).m_currentPieces.Count;
+                int l_goalTilePieces = GetTileByColorAndID(l_player.m_color, 72).m_currentPieces.Count;
+
+                if (l_homeTilePieces > 0 && l_homeTilePieces + l_goalTilePieces == 4) //Player has NO pieces to move -> Pass turn
+                    ChangePlayerTurn(client, l_player.m_color);
+                else
+                    client.Send(l_message2); //Chose Piece
+            }
+            else
+                client.Send(l_message2); //Chose Piece
         }
         public void OnSelectPiece(Client currentTurnClient, int originID)
         {
@@ -138,8 +150,7 @@ namespace Ludo_MasterServer
                     }
                     else
                     {
-                        
-                        currentTurnClient.Send(l_message2);
+                         currentTurnClient.Send(l_message2);
                         return;
                     }
                 }
@@ -212,23 +223,53 @@ namespace Ludo_MasterServer
                 }
             }
             else //Change to next player turn
-            {
-                Colors l_nextTurnColor = (Colors)((int)l_color + 1);
-                if ((int)l_nextTurnColor >= 4)
-                    l_nextTurnColor = (Colors)0;
+                ChangePlayerTurn(currentTurnClient, l_color);
 
-                for (int i = 0; i < m_clientList.Count; i++)
-                {
-                    Client l_client = m_clientList[i];
-                    if (l_client != null)
-                    {
-                        NetworkMessage l_message3 = MessageConstructor.ChangeTurn(l_nextTurnColor, m_playersPerID[l_client.m_id].m_color == l_nextTurnColor);
-                        l_client.Send(l_message3);
-                    }
-                }
-                m_playersPerID[currentTurnClient.m_id].m_rollResults.Clear();
-            }
             Console.WriteLine("player {0}| origin {1}| dest {2}", currentTurnClient.m_name, originID, l_destID);
+        }
+
+        private void ChangePlayerTurn(Client playerClient, Colors playerColor)
+        {
+            int l_alreadyCompletedPlayers = 0;
+            bool l_checkingNextPlayer = true;
+            int l_index = 1;
+            Colors l_nextTurnColor = (Colors)((int)playerColor + l_index);
+
+            while (l_checkingNextPlayer)
+            {
+                l_nextTurnColor = (Colors)((int)playerColor + l_index);
+                if ((int)l_nextTurnColor >= 4)
+                {
+                    l_index = 0;
+                    l_nextTurnColor = (Colors)l_index;
+                }
+
+                TileInfo l_goalTile = GetTileByColorAndID(l_nextTurnColor, 72);
+                if (l_goalTile.m_currentPieces.Count < 4)
+                    l_checkingNextPlayer = false;
+                else
+                {
+                    l_alreadyCompletedPlayers++;
+                    l_index++;
+                }
+
+                if (l_alreadyCompletedPlayers >= 3)
+                {
+                    EndMatch();
+                    return;
+                }
+            }
+
+            for (int i = 0; i < m_clientList.Count; i++)
+            {
+                Client l_client = m_clientList[i];
+                if (l_client != null)
+                {
+                    NetworkMessage l_message = MessageConstructor.ChangeTurn(l_nextTurnColor, m_playersPerID[l_client.m_id].m_color == l_nextTurnColor);
+                    l_client.Send(l_message);
+                }
+            }
+            m_playersPerID[playerClient.m_id].m_rollResults.Clear();
         }
 
         private void MovePiece(Client currentTurnClient, Colors color, int originID, int destID)
@@ -254,7 +295,17 @@ namespace Ludo_MasterServer
             }
         }
 
-#region TileManagement
+        private void EndMatch()
+        {
+            Console.WriteLine("GAME WITH ID {0} ENDED!", m_roomID);
+
+            NetworkMessage l_message = MessageConstructor.EndMatch();
+            for (int i = 0; i < m_clientList.Count; i++)
+                m_clientList[i].Send(l_message);
+
+            Program.m_gameManager.EndMatch(m_roomID);
+        }
+        #region TileManagement
         public TileInfo GetTileByColorAndID(Colors pieceColor, int ID)
         {
             TileInfo l_tile = new TileInfo(-1, -1, -1, -1);

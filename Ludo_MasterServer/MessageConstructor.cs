@@ -80,5 +80,37 @@ namespace Ludo_MasterServer
             l_message.Build(MessageType.movePiece);
             return l_message;
         }
+        public static NetworkMessage EndMatch()
+        {
+            NetworkMessage l_message = new NetworkMessage();
+            l_message.Build(MessageType.endMatch);
+            return l_message;
+        }
+        public static NetworkMessage CurrentGames(Dictionary<int, GameServer> gameServersPerID, int clientID)
+        {
+            NetworkMessage l_message = new NetworkMessage();
+            List<GameServer> l_gameServers = new List<GameServer>();
+
+            foreach (var keyValue in gameServersPerID)
+                if (keyValue.Value.m_clientList.FirstOrDefault(x => x.m_id == clientID) != null)
+                    l_gameServers.Add(keyValue.Value);
+
+            l_message.Write(l_gameServers.Count); //Number of GameServers Assosiated with clientID
+
+            if(l_gameServers.Count > 0)
+                foreach (var gs in l_gameServers)
+                {
+                    l_message.Write(gs.m_roomID); //Id of the gameServer
+                    l_message.Write(gs.m_playersPerID[clientID].m_currentTurn); //has the client the current turn
+                    foreach (var player in gs.m_playersPerID)
+                    {
+                        if (player.Key != clientID)
+                           l_message.Write(player.Value.m_name); //names of the others 3 players
+                    }
+                }
+
+            l_message.Build(MessageType.currentGames);
+            return l_message;
+        }
     }
 }

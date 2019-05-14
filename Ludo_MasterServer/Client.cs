@@ -81,14 +81,19 @@ namespace Ludo_MasterServer
                         this.m_name = l_name;
                         this.m_id = Program.m_server.m_database.GetClientID(m_name);
                         l_message = MessageConstructor.LogInSucess();
+                        Send(l_message);
                         Console.WriteLine("User loged in Succes| Name: {0}|Pass: {1}", l_name, l_pass);
+
+                        NetworkMessage l_message2 = MessageConstructor.CurrentGames(Program.m_gameManager.m_gameServersPerID, this.m_id);
+                        Send(l_message2);
                     }
                     else
                     {
-                         l_message = MessageConstructor.LogInFailed();
+                        l_message = MessageConstructor.LogInFailed();
+                        Send(l_message);
                         Console.WriteLine("User LogIn Failed| Name: {0}|Pass: {1}", l_name, l_pass);
                     }
-                    Send(l_message);
+                   
                     break;
                 case MessageType.ping:
                     break;

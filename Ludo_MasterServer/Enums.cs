@@ -23,6 +23,8 @@ namespace Ludo_MasterServer
             rollDice = 0x08,
             choosePiece = 0x09,
             quitQueue = 0x10,
+            endMatch = 0x11,
+            currentGames = 0x12,
         }
     }
 }

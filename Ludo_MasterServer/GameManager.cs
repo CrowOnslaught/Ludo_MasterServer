@@ -52,6 +52,12 @@ namespace Ludo_MasterServer
         {
             m_gameServersPerID[roomID].OnSelectPiece(c, tileID);
         }
+
+        public void EndMatch(int roomID)
+        {
+            Console.WriteLine("GAME WITH ID {0} ENDED", roomID);
+            m_gameServersPerID.Remove(roomID);
+        }
     }
 
 }
