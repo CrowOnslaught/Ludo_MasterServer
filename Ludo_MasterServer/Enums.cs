@@ -25,6 +25,8 @@ namespace Ludo_MasterServer
             quitQueue = 0x10,
             endMatch = 0x11,
             currentGames = 0x12,
+            rejoinGame = 0x13,
+            refreshCurrentGames = 0x14,
         }
     }
 }

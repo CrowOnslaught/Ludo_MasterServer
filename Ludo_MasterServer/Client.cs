@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading;
 using static Ludo_MasterServer.Enums;
+using static Ludo_MasterServer.GameServer;
 
 namespace Ludo_MasterServer
 {
@@ -75,22 +78,19 @@ namespace Ludo_MasterServer
                     string l_name = message.ReadString();
                     string l_pass = message.ReadString();
 
-                    NetworkMessage l_message;
                     if (TryToLogIn(l_name, l_pass))
                     {
                         this.m_name = l_name;
                         this.m_id = Program.m_server.m_database.GetClientID(m_name);
-                        l_message = MessageConstructor.LogInSucess();
-                        Send(l_message);
+                        Send(MessageConstructor.LogInSucess());
+
                         Console.WriteLine("User loged in Succes| Name: {0}|Pass: {1}", l_name, l_pass);
 
-                        NetworkMessage l_message2 = MessageConstructor.CurrentGames(Program.m_gameManager.m_gameServersPerID, this.m_id);
-                        Send(l_message2);
+                        Send(MessageConstructor.CurrentGames(Program.m_gameManager.m_gameServersPerID, this.m_id));
                     }
                     else
                     {
-                        l_message = MessageConstructor.LogInFailed();
-                        Send(l_message);
+                        Send(MessageConstructor.LogInFailed());
                         Console.WriteLine("User LogIn Failed| Name: {0}|Pass: {1}", l_name, l_pass);
                     }
                    
@@ -109,6 +109,32 @@ namespace Ludo_MasterServer
                     break;
                 case MessageType.choosePiece:
                     Program.m_gameManager.OnClientSelectPiece(this, message.ReadInt(), message.ReadInt());
+                    break;
+                case MessageType.rejoinGame:
+                    GameServer l_gs = Program.m_gameManager.m_gameServersPerID[message.ReadInt()];
+                    PlayerInfo l_pi = l_gs.m_playersPerID[this.m_id];
+                    l_pi.m_client = this;
+
+                    Client l_client = l_gs.m_clientList.FirstOrDefault(x => x.m_id == this.m_id);
+                    if (l_client != null)
+                        l_gs.m_clientList.Remove(l_client);
+
+                    l_gs.m_clientList.Add(this);
+
+                    Console.WriteLine();
+                    for (int i = 0; i < l_gs.m_clientList.Count; i++)
+                        Console.Write(l_gs.m_clientList[i].m_name + "|");
+
+                    this.Send(MessageConstructor.StartNewMatch(l_gs.m_roomID, l_gs.PlayerInfoList()));
+                    if (l_pi.m_currentTurn)
+                    {
+                        Thread.Sleep(800);
+                        this.Send(MessageConstructor.ChangeTurn(l_gs.PlayerInfoList().Find(x => x.m_currentTurn).m_color, l_pi.m_currentTurn));
+                    }
+
+                    break;
+                case MessageType.refreshCurrentGames:
+                    Send(MessageConstructor.CurrentGames(Program.m_gameManager.m_gameServersPerID, this.m_id));
                     break;
                 default:
                     Console.WriteLine("Error 002: Unknown type of Message");

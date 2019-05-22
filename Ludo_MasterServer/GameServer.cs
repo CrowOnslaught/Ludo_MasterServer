@@ -15,6 +15,16 @@ namespace Ludo_MasterServer
         public Dictionary<int, PlayerInfo> m_playersPerID = new Dictionary<int, PlayerInfo>();
         public int m_roomID;
 
+        public List<PlayerInfo> PlayerInfoList()
+        {
+            List<PlayerInfo> l_list = new List<PlayerInfo>();
+
+            foreach (var pi in m_playersPerID)
+                l_list.Add(pi.Value);
+
+            return l_list;
+        }
+
 #region structs
         public struct PlayerInfo
         {
@@ -89,7 +99,7 @@ namespace Ludo_MasterServer
                     m_clientList[i].Send(l_message);
             }
 
-            Thread.Sleep(2000);
+            Thread.Sleep(850);
             for (int i = 0; i < m_clientList.Count; i++)
             {
                 if (m_clientList[i] != null)
@@ -115,7 +125,6 @@ namespace Ludo_MasterServer
                 if (m_clientList[i] != null)
                     m_clientList[i].Send(l_message);
 
-            NetworkMessage l_message2 = MessageConstructor.ChoosePiece();
             if (l_rollResult != 5)
             {
                 int l_homeTilePieces = GetTileByColorAndID(l_player.m_color, 0).m_currentPieces.Count;
@@ -124,14 +133,14 @@ namespace Ludo_MasterServer
                 if (l_homeTilePieces > 0 && l_homeTilePieces + l_goalTilePieces == 4) //Player has NO pieces to move -> Pass turn
                     ChangePlayerTurn(client, l_player.m_color);
                 else
-                    client.Send(l_message2); //Chose Piece
+                    client.Send(MessageConstructor.ChoosePiece());
             }
             else
-                client.Send(l_message2); //Chose Piece
+                client.Send(MessageConstructor.ChoosePiece());
         }
         public void OnSelectPiece(Client currentTurnClient, int originID)
         {
-            NetworkMessage l_message2 = MessageConstructor.ChoosePiece();
+            NetworkMessage l_choosePieceMessage = MessageConstructor.ChoosePiece();
 
             Colors l_color = m_playersPerID[currentTurnClient.m_id].m_color;
             TileInfo l_originTile = GetTileByColorAndID(l_color, originID);
@@ -150,13 +159,13 @@ namespace Ludo_MasterServer
                     }
                     else
                     {
-                         currentTurnClient.Send(l_message2);
+                         currentTurnClient.Send(l_choosePieceMessage);
                         return;
                     }
                 }
                 else
                 {
-                    currentTurnClient.Send(l_message2);
+                    currentTurnClient.Send(l_choosePieceMessage);
                     return;
                 }
             }
@@ -204,7 +213,7 @@ namespace Ludo_MasterServer
 
                             //Make player move 10 tiles
                             m_playersPerID[currentTurnClient.m_id].m_rollResults.Add(10);
-                            currentTurnClient.Send(l_message2);
+                            currentTurnClient.Send(l_choosePieceMessage);
                             return;
                         }
                     }
@@ -262,6 +271,15 @@ namespace Ludo_MasterServer
 
             for (int i = 0; i < m_clientList.Count; i++)
             {
+                PlayerInfo l_pi = m_playersPerID.ElementAt(i).Value;
+                l_pi.m_currentTurn = l_pi.m_color == l_nextTurnColor;
+                m_playersPerID[l_pi.m_id] = l_pi;
+                Console.Write(l_pi.m_name + "|" + l_pi.m_currentTurn + "\n");
+
+            }
+
+            for (int i = 0; i < m_clientList.Count; i++)
+            {
                 Client l_client = m_clientList[i];
                 if (l_client != null)
                 {
@@ -285,6 +303,10 @@ namespace Ludo_MasterServer
                     break;
                 }
 
+
+            PlayerInfo l_player = GetPlayerByColor(color);
+            int l_index = Array.IndexOf(l_player.m_piecePos, originID);
+            l_player.m_piecePos[l_index] = destID;
 
             NetworkMessage l_message = MessageConstructor.MovePiece(color, originID, destID);
             for (int i = 0; i < m_clientList.Count; i++)
@@ -347,6 +369,11 @@ namespace Ludo_MasterServer
             }
 
             return l_tileID;
+        }
+
+        public PlayerInfo GetPlayerByColor(Colors color)
+        {
+            return PlayerInfoList().FirstOrDefault(x => x.m_color == color);
         }
         public TileInfo[] m_tiles = new TileInfo[]
         {
