@@ -14,6 +14,8 @@ namespace Ludo_MasterServer
         public List<Client> m_clientList = new List<Client>();
         public Dictionary<int, PlayerInfo> m_playersPerID = new Dictionary<int, PlayerInfo>();
         public int m_roomID;
+        private MatchState m_matchState = MatchState.none;
+        private List<PlayerInfo> m_completedPlayers = new List<PlayerInfo>();
 
         public List<PlayerInfo> PlayerInfoList()
         {
@@ -68,6 +70,8 @@ namespace Ludo_MasterServer
 
         public void SetUp()
         {
+            m_matchState = MatchState.starting;
+
             List<PlayerInfo> l_ListToSend = new List<PlayerInfo>();
             for (int i = 0; i < m_clientList.Count; i++)
             {
@@ -110,6 +114,7 @@ namespace Ludo_MasterServer
                     m_playersPerID[m_clientList[i].m_id].m_rollResults.Clear();
                 }
             }
+            m_matchState = MatchState.rolling;
         }
 
         public void OnRollDice(Client client)
@@ -137,6 +142,8 @@ namespace Ludo_MasterServer
             }
             else
                 client.Send(MessageConstructor.ChoosePiece());
+
+            m_matchState = MatchState.selectingPiece;
         }
         public void OnSelectPiece(Client currentTurnClient, int originID)
         {
@@ -239,7 +246,12 @@ namespace Ludo_MasterServer
 
         private void ChangePlayerTurn(Client playerClient, Colors playerColor)
         {
-            int l_alreadyCompletedPlayers = 0;
+            if (m_completedPlayers.Count >= 3)
+            {
+                EndMatch();
+                return;
+            }
+
             bool l_checkingNextPlayer = true;
             int l_index = 1;
             Colors l_nextTurnColor = (Colors)((int)playerColor + l_index);
@@ -253,20 +265,13 @@ namespace Ludo_MasterServer
                     l_nextTurnColor = (Colors)l_index;
                 }
 
-                TileInfo l_goalTile = GetTileByColorAndID(l_nextTurnColor, 72);
-                if (l_goalTile.m_currentPieces.Count < 4)
-                    l_checkingNextPlayer = false;
-                else
+                if (m_completedPlayers.Contains(GetPlayerByColor(l_nextTurnColor)))
                 {
-                    l_alreadyCompletedPlayers++;
+                    l_checkingNextPlayer = true;
                     l_index++;
                 }
-
-                if (l_alreadyCompletedPlayers >= 3)
-                {
-                    EndMatch();
-                    return;
-                }
+                else
+                    l_checkingNextPlayer = false;
             }
 
             for (int i = 0; i < m_clientList.Count; i++)
@@ -288,6 +293,8 @@ namespace Ludo_MasterServer
                 }
             }
             m_playersPerID[playerClient.m_id].m_rollResults.Clear();
+
+            m_matchState = MatchState.rolling;
         }
 
         private void MovePiece(Client currentTurnClient, Colors color, int originID, int destID)
@@ -308,6 +315,15 @@ namespace Ludo_MasterServer
             int l_index = Array.IndexOf(l_player.m_piecePos, originID);
             l_player.m_piecePos[l_index] = destID;
 
+            //Check if player ended game
+            if (GetTileByColorAndID(color, 72).m_currentPieces.Count >= 4)
+            {
+                m_completedPlayers.Add(l_player);
+                currentTurnClient.Send(MessageConstructor.EndMatch(m_completedPlayers.Count));
+
+                m_clientList.Remove(currentTurnClient);
+            }
+
             NetworkMessage l_message = MessageConstructor.MovePiece(color, originID, destID);
             for (int i = 0; i < m_clientList.Count; i++)
             {
@@ -315,17 +331,20 @@ namespace Ludo_MasterServer
                 if (l_client != null)
                     l_client.Send(l_message);
             }
+
+
         }
 
         private void EndMatch()
         {
             Console.WriteLine("GAME WITH ID {0} ENDED!", m_roomID);
 
-            NetworkMessage l_message = MessageConstructor.EndMatch();
+            NetworkMessage l_message = MessageConstructor.EndMatch(4);
             for (int i = 0; i < m_clientList.Count; i++)
                 m_clientList[i].Send(l_message);
 
             Program.m_gameManager.EndMatch(m_roomID);
+            m_matchState = MatchState.ended;
         }
         #region TileManagement
         public TileInfo GetTileByColorAndID(Colors pieceColor, int ID)

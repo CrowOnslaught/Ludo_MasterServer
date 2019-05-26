@@ -82,7 +82,7 @@ namespace Ludo_MasterServer
                     {
                         this.m_name = l_name;
                         this.m_id = Program.m_server.m_database.GetClientID(m_name);
-                        Send(MessageConstructor.LogInSucess());
+                        Send(MessageConstructor.LogInSucess(m_id));
 
                         Console.WriteLine("User loged in Succes| Name: {0}|Pass: {1}", l_name, l_pass);
 
@@ -147,12 +147,20 @@ namespace Ludo_MasterServer
             bool success = false;
             if (name != null && password != null)
             {
-                if (Program.m_server.m_database.ExistsName(name))
+                if (Program.m_server.m_database.ExistsName(name)) //That name Exists in Database
                 {
-                    if (Program.m_server.m_database.GetClientPassword(name) == password)
-                        success = true;
+                    if (Program.m_server.m_database.GetClientPassword(name) == password) //Sent password coincide with database's client pass
+                    {
+                        int l_id = Program.m_server.m_database.GetClientID(name);
+                        if (Program.m_server.ClientsList.FirstOrDefault(x => x.m_id == l_id) == null) //There is no client with that ID already connected
+                            success = true;
+                        else
+                            success = false;
+                    }
+                    else
+                        success = false;
                 }
-                else
+                else //Name doesn't exists in database
                 {
                     Program.m_server.m_database.AddClient(name, password);
                     success = true;

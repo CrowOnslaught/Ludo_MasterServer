@@ -15,6 +15,8 @@ namespace Ludo_MasterServer
 
         public SQLiteManager m_database;
 
+        public List<Client> ClientsList { get { return m_clientList; } }
+
 
         public Server()
         {
@@ -28,7 +30,21 @@ namespace Ludo_MasterServer
             m_threadReading.Start();
 
             m_database = new SQLiteManager();
-            Console.WriteLine("STARTING SERVER!! D:");
+            Console.WriteLine("STARTING SERVER!!");
+
+
+            String strHostName = string.Empty;
+            // Getting Ip address of local machine...
+            // First get the host name of local machine.
+            strHostName = Dns.GetHostName();
+            Console.WriteLine("Local Machine's Host Name: " + strHostName);
+            // Then using host name, get the IP address list..
+            IPHostEntry ipEntry = Dns.GetHostEntry(strHostName);
+            IPAddress[] addr = ipEntry.AddressList;
+            for (int i = 0; i < addr.Length; i++)
+            {
+                Console.WriteLine("IP Address {0}: {1} ", i, addr[i].ToString());
+            }
         }
 
         public void Listening()

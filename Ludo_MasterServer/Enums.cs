@@ -28,5 +28,14 @@ namespace Ludo_MasterServer
             rejoinGame = 0x13,
             refreshCurrentGames = 0x14,
         }
+
+        public enum MatchState
+        {
+            none = 0,
+            starting,
+            rolling,
+            selectingPiece,
+            ended,
+        }
     }
 }

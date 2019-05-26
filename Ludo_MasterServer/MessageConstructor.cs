@@ -15,9 +15,12 @@ namespace Ludo_MasterServer
             l_message.Build(MessageType.welcome);
             return l_message;
         }
-        public static NetworkMessage LogInSucess()
+        public static NetworkMessage LogInSucess(int clientID)
         {
+            int l_clientScore = Program.m_server.m_database.GetClientScore(clientID);
+
             NetworkMessage l_message = new NetworkMessage();
+            l_message.Write(l_clientScore);
             l_message.Build(MessageType.logIn);
             return l_message;
         }
@@ -80,9 +83,10 @@ namespace Ludo_MasterServer
             l_message.Build(MessageType.movePiece);
             return l_message;
         }
-        public static NetworkMessage EndMatch()
+        public static NetworkMessage EndMatch(int position)
         {
             NetworkMessage l_message = new NetworkMessage();
+            l_message.Write(position);
             l_message.Build(MessageType.endMatch);
             return l_message;
         }

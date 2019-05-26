@@ -150,13 +150,58 @@ namespace Ludo_MasterServer
             {
                 while (l_result.Read())
                 {
-                    if(name == l_result["name"].ToString());
+                    if(name == l_result["name"].ToString())
                         l_exists = true;
                 }
             }
             CloseConnection();
 
             return l_exists;
+        }
+
+        public int GetClientScore(int id)
+        {
+            OpenConnection();
+
+            int l_score = 0;
+
+            //Get actual score
+            string l_query = "SELECT score FROM clients WHERE id = @id";
+            SQLiteCommand l_command = new SQLiteCommand(l_query, m_connection);
+            l_command.Parameters.AddWithValue("@id", id);
+
+            SQLiteDataReader l_result = l_command.ExecuteReader();
+            if (l_result.HasRows)
+            {
+                while (l_result.Read())
+                {
+                    l_score = l_result.GetInt32(0);
+                }
+            }
+
+            CloseConnection();
+            return l_score;
+        }
+
+        public void AddScoreToClient(int id, int position)
+        {
+            int l_scoreToAdd = 4 - position;
+           
+            if(l_scoreToAdd > 0)
+            {
+                OpenConnection();
+
+                int l_currentScore = GetClientScore(id);
+                l_currentScore += l_scoreToAdd;
+
+                string query = "UPDATE clients SET score = @score WHERE id = @id;";
+                SQLiteCommand l_command2 = new SQLiteCommand(query, m_connection);
+                l_command2.Parameters.AddWithValue("@score", l_scoreToAdd);
+                l_command2.Parameters.AddWithValue("@id", id);
+                var result = l_command2.ExecuteNonQuery();
+
+                CloseConnection();
+            }
         }
     }
 }
