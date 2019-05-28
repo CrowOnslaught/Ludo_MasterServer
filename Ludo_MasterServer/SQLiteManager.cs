@@ -1,8 +1,24 @@
-﻿using System.Data.SQLite;
+﻿using System.Collections.Generic;
+using System.Data.SQLite;
 using System.IO;
 
 namespace Ludo_MasterServer
 {
+    public struct PlayerRankingInfo
+    {
+        public string m_playerName;
+        public string m_playerScore;
+        public string m_rankingPos;
+
+        public PlayerRankingInfo(string name, string score, string pos)
+        {
+            m_playerName = name;
+            m_playerScore = score;
+            m_rankingPos = pos;
+        }
+    }
+
+
     public class SQLiteManager
     {
         public SQLiteConnection m_connection;
@@ -14,6 +30,7 @@ namespace Ludo_MasterServer
             if (!File.Exists("./database.sqlite3"))
             {
                 SQLiteConnection.CreateFile("database.sqlite3");
+                InitDatabaseTables();
             }
         }
         private void OpenConnection()
@@ -29,6 +46,21 @@ namespace Ludo_MasterServer
             {
                 m_connection.Close();
             }
+        }
+
+        private void InitDatabaseTables()
+        {
+            OpenConnection();
+
+            string query = "CREATE TABLE clients (id INTEGER PRIMARY KEY AUTOINCREMENT,name  TEXT,password  TEXT,score INTEGER DEFAULT 0)";
+            SQLiteCommand l_command = new SQLiteCommand(query, m_connection);
+            l_command.ExecuteNonQuery();
+
+            //string query2 = "CREATE TABLE clients (id INTEGER PRIMARY KEY AUTOINCREMENT,name  TEXT,password  TEXT,score INTEGER DEFAULT 0)";
+            //SQLiteCommand l_command2 = new SQLiteCommand(query2, m_connection);
+            //l_command2.ExecuteNonQuery();
+
+            CloseConnection();
         }
 
         public void AddClient(string name, string password)
@@ -202,6 +234,32 @@ namespace Ludo_MasterServer
 
                 CloseConnection();
             }
+        }
+
+        public List<PlayerRankingInfo> GetRankingTop(int amount)
+        {
+            OpenConnection();
+
+            List<PlayerRankingInfo> l_list = new List<PlayerRankingInfo>();
+            //Get actual score
+            string l_query = "SELECT id, name, score FROM clients ORDER BY score DESC LIMIT @amount";
+            SQLiteCommand l_command = new SQLiteCommand(l_query, m_connection);
+            l_command.Parameters.AddWithValue("@amount", amount);
+
+            SQLiteDataReader l_result = l_command.ExecuteReader();
+            if (l_result.HasRows)
+            {
+                int l_pos = 1;
+                while (l_result.Read())
+                {
+                    PlayerRankingInfo l_player = new PlayerRankingInfo(l_result["name"].ToString(), l_result["score"].ToString(), l_pos.ToString());
+                    l_list.Add(l_player);
+                    l_pos++;
+                }
+            }
+
+            CloseConnection();
+            return l_list;
         }
     }
 }

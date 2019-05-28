@@ -136,6 +136,9 @@ namespace Ludo_MasterServer
                 case MessageType.refreshCurrentGames:
                     Send(MessageConstructor.CurrentGames(Program.m_gameManager.m_gameServersPerID, this.m_id));
                     break;
+                case MessageType.ranking:
+                    Send(MessageConstructor.Ranking(5));
+                    break;
                 default:
                     Console.WriteLine("Error 002: Unknown type of Message");
                     break;

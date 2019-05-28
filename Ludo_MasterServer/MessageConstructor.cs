@@ -116,5 +116,23 @@ namespace Ludo_MasterServer
             l_message.Build(MessageType.currentGames);
             return l_message;
         }
+
+        public static NetworkMessage Ranking(int amount)
+        {
+            NetworkMessage l_message = new NetworkMessage();
+            List<PlayerRankingInfo> l_rankingList = Program.m_server.m_database.GetRankingTop(amount);
+
+            l_message.Write(l_rankingList.Count);
+            for (int i = 0; i < l_rankingList.Count; i++)
+            {
+                l_message.Write(l_rankingList[i].m_playerName);
+                l_message.Write(l_rankingList[i].m_playerScore);
+                l_message.Write(l_rankingList[i].m_rankingPos);
+            }
+
+
+            l_message.Build(MessageType.ranking);
+            return l_message;
+        }
     }
 }
