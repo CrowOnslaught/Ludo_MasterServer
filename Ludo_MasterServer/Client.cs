@@ -3,8 +3,6 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
-using static Ludo_MasterServer.Enums;
-using static Ludo_MasterServer.GameServer;
 
 namespace Ludo_MasterServer
 {
@@ -71,10 +69,10 @@ namespace Ludo_MasterServer
         {
             switch (message.m_type)
             {
-                case MessageType.welcome:
+				case Enums.MessageType.welcome:
                     Console.Write("Client Connected|");
                     break;
-                case MessageType.logIn:
+				case Enums.MessageType.logIn:
                     string l_name = message.ReadString();
                     string l_pass = message.ReadString();
 
@@ -95,24 +93,24 @@ namespace Ludo_MasterServer
                     }
                    
                     break;
-                case MessageType.ping:
+				case Enums.MessageType.ping:
                     break;
-                case MessageType.joinNewGame:
+				case Enums.MessageType.joinNewGame:
                     Program.m_gameManager.EnqueueClient(this);
                     Console.WriteLine("Client Enqueued! Current Clients in queue: {0}", Program.m_gameManager.m_enqueuedClients.Count);
                     break;
-                case MessageType.quitQueue:
+				case Enums.MessageType.quitQueue:
                     Program.m_gameManager.DequeueClient(this);
                     break;
-                case MessageType.rollDice:
+				case Enums.MessageType.rollDice:
                     Program.m_gameManager.OnClientRollDice(this, message.ReadInt());
                     break;
-                case MessageType.choosePiece:
+				case Enums.MessageType.choosePiece:
                     Program.m_gameManager.OnClientSelectPiece(this, message.ReadInt(), message.ReadInt());
                     break;
-                case MessageType.rejoinGame:
+				case Enums.MessageType.rejoinGame:
                     GameServer l_gs = Program.m_gameManager.m_gameServersPerID[message.ReadInt()];
-                    PlayerInfo l_pi = l_gs.m_playersPerID[this.m_id];
+					GameServer.PlayerInfo l_pi = l_gs.m_playersPerID[this.m_id];
                     l_pi.m_client = this;
 
                     Client l_client = l_gs.m_clientList.FirstOrDefault(x => x.m_id == this.m_id);
@@ -133,10 +131,10 @@ namespace Ludo_MasterServer
                     }
 
                     break;
-                case MessageType.refreshCurrentGames:
+				case Enums.MessageType.refreshCurrentGames:
                     Send(MessageConstructor.CurrentGames(Program.m_gameManager.m_gameServersPerID, this.m_id));
                     break;
-                case MessageType.ranking:
+                case Enums.MessageType.ranking:
                     Send(MessageConstructor.Ranking(5));
                     break;
                 default:

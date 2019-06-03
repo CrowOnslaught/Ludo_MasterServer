@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static Ludo_MasterServer.Enums;
 
 namespace Ludo_MasterServer
 {
@@ -12,7 +11,7 @@ namespace Ludo_MasterServer
         public static NetworkMessage Welcome()
         {
             NetworkMessage l_message = new NetworkMessage();
-            l_message.Build(MessageType.welcome);
+			l_message.Build(Enums.MessageType.welcome);
             return l_message;
         }
         public static NetworkMessage LogInSucess(int clientID)
@@ -21,14 +20,14 @@ namespace Ludo_MasterServer
 
             NetworkMessage l_message = new NetworkMessage();
             l_message.Write(l_clientScore);
-            l_message.Build(MessageType.logIn);
+			l_message.Build(Enums.MessageType.logIn);
             return l_message;
         }
 
         public static NetworkMessage LogInFailed()
         {
             NetworkMessage l_message = new NetworkMessage();
-            l_message.Build(MessageType.loginFailed);
+			l_message.Build(Enums.MessageType.loginFailed);
             return l_message;
         }
         public static NetworkMessage StartNewMatch(int idGame, List<GameServer.PlayerInfo> clientList)
@@ -46,7 +45,7 @@ namespace Ludo_MasterServer
                 for (int j = 0; j < 4; j++) //StartPiecesPos
                     l_message.Write(clientList[i].m_piecePos[j]);
             }
-            l_message.Build(MessageType.startNewGame);
+			l_message.Build(Enums.MessageType.startNewGame);
             return l_message;
         }
         public static NetworkMessage ChangeTurn(Enums.Colors turnColor, bool clientTurn)
@@ -54,7 +53,7 @@ namespace Ludo_MasterServer
             NetworkMessage l_message = new NetworkMessage();
             l_message.Write((int)turnColor);
             l_message.Write(clientTurn);
-            l_message.Build(MessageType.changeTurn);
+			l_message.Build(Enums.MessageType.changeTurn);
             return l_message;
         }
 
@@ -62,32 +61,32 @@ namespace Ludo_MasterServer
         {
             NetworkMessage l_message = new NetworkMessage();
             l_message.Write(result);
-            l_message.Build(MessageType.rollDice);
+			l_message.Build(Enums.MessageType.rollDice);
             return l_message;
         }
 
         public static NetworkMessage ChoosePiece()
         {
             NetworkMessage l_message = new NetworkMessage();
-            l_message.Build(MessageType.choosePiece);
+			l_message.Build(Enums.MessageType.choosePiece);
             return l_message;
         }
 
-        public static NetworkMessage MovePiece(Colors color, int originID, int destID)
+		public static NetworkMessage MovePiece(Enums.Colors color, int originID, int destID)
         {
             NetworkMessage l_message = new NetworkMessage();
             l_message.Write((int)color);
             l_message.Write(originID);
             l_message.Write(destID);
 
-            l_message.Build(MessageType.movePiece);
+			l_message.Build(Enums.MessageType.movePiece);
             return l_message;
         }
         public static NetworkMessage EndMatch(int position)
         {
             NetworkMessage l_message = new NetworkMessage();
             l_message.Write(position);
-            l_message.Build(MessageType.endMatch);
+			l_message.Build(Enums.MessageType.endMatch);
             return l_message;
         }
         public static NetworkMessage CurrentGames(Dictionary<int, GameServer> gameServersPerID, int clientID)
@@ -113,7 +112,7 @@ namespace Ludo_MasterServer
                     }
                 }
 
-            l_message.Build(MessageType.currentGames);
+			l_message.Build(Enums.MessageType.currentGames);
             return l_message;
         }
 
@@ -131,7 +130,7 @@ namespace Ludo_MasterServer
             }
 
 
-            l_message.Build(MessageType.ranking);
+			l_message.Build(Enums.MessageType.ranking);
             return l_message;
         }
     }

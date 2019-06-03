@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.SQLite;
+using Mono.Data.Sqlite;
 using System.IO;
 
 namespace Ludo_MasterServer
@@ -22,15 +22,15 @@ namespace Ludo_MasterServer
 
     public class SQLiteManager
     {
-        public SQLiteConnection m_connection;
+        public SqliteConnection m_connection;
 
         public SQLiteManager()
         {
-            m_connection = new SQLiteConnection("Data Source=database.sqlite3");
+            m_connection = new SqliteConnection("Data Source=database.sqlite3");
 
             if (!File.Exists("./database.sqlite3"))
             {
-                SQLiteConnection.CreateFile("database.sqlite3");
+                SqliteConnection.CreateFile("database.sqlite3");
                 InitDatabaseTables();
             }
         }
@@ -54,7 +54,7 @@ namespace Ludo_MasterServer
             OpenConnection();
 
             string query = "CREATE TABLE clients (id INTEGER PRIMARY KEY AUTOINCREMENT,name  TEXT,password  TEXT,score INTEGER DEFAULT 0)";
-            SQLiteCommand l_command = new SQLiteCommand(query, m_connection);
+            SqliteCommand l_command = new SqliteCommand(query, m_connection);
             l_command.ExecuteNonQuery();
 
             string query2 = "CREATE TABLE matchs (id INTEGER PRIMARY KEY AUTOINCREMENT, " +
@@ -63,7 +63,7 @@ namespace Ludo_MasterServer
                 "id_first  INTEGER,id_second INTEGER, " +
                 "id_third  INTEGER,id_fourth INTEGER)";
 
-            SQLiteCommand l_command2 = new SQLiteCommand(query2, m_connection);
+            SqliteCommand l_command2 = new SqliteCommand(query2, m_connection);
             l_command2.ExecuteNonQuery();
 
             CloseConnection();
@@ -74,7 +74,7 @@ namespace Ludo_MasterServer
             OpenConnection();
 
             string query = "INSERT INTO clients ('name', 'password') VALUES (@name, @password)";
-            SQLiteCommand l_command = new SQLiteCommand(query, m_connection);
+            SqliteCommand l_command = new SqliteCommand(query, m_connection);
             l_command.Parameters.AddWithValue("@name", name);
             l_command.Parameters.AddWithValue("@password", password);
             var result = l_command.ExecuteNonQuery();
@@ -88,10 +88,10 @@ namespace Ludo_MasterServer
             string l_name = "";
 
             string l_query = "SELECT name FROM clients WHERE id = @id";
-            SQLiteCommand l_command = new SQLiteCommand(l_query, m_connection);
+            SqliteCommand l_command = new SqliteCommand(l_query, m_connection);
             l_command.Parameters.AddWithValue("@id", id);
 
-            SQLiteDataReader l_result = l_command.ExecuteReader();
+            SqliteDataReader l_result = l_command.ExecuteReader();
             if (l_result.HasRows)
             {
                 while(l_result.Read())
@@ -110,11 +110,11 @@ namespace Ludo_MasterServer
             string l_pass = "";
 
             string l_query = "SELECT * FROM clients WHERE id = @id";
-            SQLiteCommand l_command = new SQLiteCommand(l_query, m_connection);
+            SqliteCommand l_command = new SqliteCommand(l_query, m_connection);
             l_command.Parameters.AddWithValue("@id", id);
 
 
-            SQLiteDataReader l_result = l_command.ExecuteReader();
+            SqliteDataReader l_result = l_command.ExecuteReader();
             if (l_result.HasRows)
             {
                 while (l_result.Read())
@@ -133,11 +133,11 @@ namespace Ludo_MasterServer
             string l_pass = "";
 
             string l_query = "SELECT * FROM clients WHERE name = @name";
-            SQLiteCommand l_command = new SQLiteCommand(l_query, m_connection);
+            SqliteCommand l_command = new SqliteCommand(l_query, m_connection);
             l_command.Parameters.AddWithValue("@name", name);
 
 
-            SQLiteDataReader l_result = l_command.ExecuteReader();
+            SqliteDataReader l_result = l_command.ExecuteReader();
             if (l_result.HasRows)
             {
                 while (l_result.Read())
@@ -157,11 +157,11 @@ namespace Ludo_MasterServer
             int l_id = 0;
 
             string l_query = "SELECT id FROM clients WHERE name = @name";
-            SQLiteCommand l_command = new SQLiteCommand(l_query, m_connection);
+            SqliteCommand l_command = new SqliteCommand(l_query, m_connection);
             l_command.Parameters.AddWithValue("@name", name);
 
 
-            SQLiteDataReader l_result = l_command.ExecuteReader();
+            SqliteDataReader l_result = l_command.ExecuteReader();
             if (l_result.HasRows)
             {
                 while (l_result.Read())
@@ -180,10 +180,10 @@ namespace Ludo_MasterServer
             bool l_exists = false;
 
             string query = "SELECT * FROM clients WHERE name = @name";
-            SQLiteCommand l_command = new SQLiteCommand(query, m_connection);
+            SqliteCommand l_command = new SqliteCommand(query, m_connection);
             l_command.Parameters.AddWithValue("@name", name);
 
-            SQLiteDataReader l_result = l_command.ExecuteReader();
+            SqliteDataReader l_result = l_command.ExecuteReader();
             if (l_result.HasRows)
             {
                 while (l_result.Read())
@@ -205,10 +205,10 @@ namespace Ludo_MasterServer
 
             //Get actual score
             string l_query = "SELECT score FROM clients WHERE id = @id";
-            SQLiteCommand l_command = new SQLiteCommand(l_query, m_connection);
+            SqliteCommand l_command = new SqliteCommand(l_query, m_connection);
             l_command.Parameters.AddWithValue("@id", id);
 
-            SQLiteDataReader l_result = l_command.ExecuteReader();
+            SqliteDataReader l_result = l_command.ExecuteReader();
             if (l_result.HasRows)
             {
                 while (l_result.Read())
@@ -233,7 +233,7 @@ namespace Ludo_MasterServer
                 l_currentScore += l_scoreToAdd;
 
                 string query = "UPDATE clients SET score = @score WHERE id = @id;";
-                SQLiteCommand l_command2 = new SQLiteCommand(query, m_connection);
+                SqliteCommand l_command2 = new SqliteCommand(query, m_connection);
                 l_command2.Parameters.AddWithValue("@score", l_scoreToAdd);
                 l_command2.Parameters.AddWithValue("@id", id);
                 var result = l_command2.ExecuteNonQuery();
@@ -249,10 +249,10 @@ namespace Ludo_MasterServer
             List<PlayerRankingInfo> l_list = new List<PlayerRankingInfo>();
             //Get actual score
             string l_query = "SELECT id, name, score FROM clients ORDER BY score DESC LIMIT @amount";
-            SQLiteCommand l_command = new SQLiteCommand(l_query, m_connection);
+            SqliteCommand l_command = new SqliteCommand(l_query, m_connection);
             l_command.Parameters.AddWithValue("@amount", amount);
 
-            SQLiteDataReader l_result = l_command.ExecuteReader();
+            SqliteDataReader l_result = l_command.ExecuteReader();
             if (l_result.HasRows)
             {
                 int l_pos = 1;
@@ -275,7 +275,7 @@ namespace Ludo_MasterServer
             string query = "INSERT INTO matchs ('date', 'id_red', 'id_blue', 'id_green', 'id_yellow', 'id_first', 'id_second', 'id_third', 'id_fourth') " +
                             "VALUES (@date, @id_red, @id_blue,@id_green,@id_yellow,@id_first,@id_second,@id_third,@id_fourth)";
 
-            SQLiteCommand l_command = new SQLiteCommand(query, m_connection);
+            SqliteCommand l_command = new SqliteCommand(query, m_connection);
             l_command.Parameters.AddWithValue("@date", String.Format( "dd/MM/yy HH:mm", DateTime.Now));
 
             l_command.Parameters.AddWithValue("@id_red", players.Find(x=> x.m_color == Enums.Colors.red).m_id);

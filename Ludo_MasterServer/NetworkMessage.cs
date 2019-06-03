@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using static Ludo_MasterServer.Enums;
 
 namespace Ludo_MasterServer
 {
@@ -13,7 +12,7 @@ namespace Ludo_MasterServer
         public byte[] m_raw { get; private set; }
         private int m_position = 0;
         private const int m_headerSize = 1;
-        public MessageType m_type { get; private set; }
+        public Enums.MessageType m_type { get; private set; }
         public Client m_owner { get; private set; }
 
         public NetworkMessage()
@@ -25,7 +24,7 @@ namespace Ludo_MasterServer
         {
             this.m_raw = raw;
             this.m_owner = owner;
-            m_type = (MessageType)ReadByte();
+			m_type = (Enums.MessageType)ReadByte();
         }
 
         public void CopyTo(byte[] bytes, List<byte> lbytes) //Add the data to the stream
@@ -44,7 +43,7 @@ namespace Ludo_MasterServer
             }
         }
 
-        public void Build(MessageType type)
+		public void Build(Enums.MessageType type)
         {
             m_raw = new byte[m_payload.Count + m_headerSize];
             WriteTo(m_payload, m_raw, m_headerSize);

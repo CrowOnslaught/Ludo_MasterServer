@@ -4,8 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using static Ludo_MasterServer.Enums;
-
 
 namespace Ludo_MasterServer
 {
@@ -14,7 +12,7 @@ namespace Ludo_MasterServer
         public List<Client> m_clientList = new List<Client>();
         public Dictionary<int, PlayerInfo> m_playersPerID = new Dictionary<int, PlayerInfo>();
         public int m_roomID;
-        private MatchState m_matchState = MatchState.none;
+		private Enums.MatchState m_matchState = Enums.MatchState.none;
         private List<PlayerInfo> m_completedPlayers = new List<PlayerInfo>();
 
         public List<PlayerInfo> PlayerInfoList()
@@ -31,7 +29,7 @@ namespace Ludo_MasterServer
         public struct PlayerInfo
         {
             public string m_name;
-            public Colors m_color;
+			public Enums.Colors m_color;
             public int m_id;
             public Client m_client;
             public int[] m_piecePos;
@@ -48,7 +46,7 @@ namespace Ludo_MasterServer
             public int m_yellowID;
 
             public bool m_safeTile;
-            public List<Colors> m_currentPieces;
+			public List<Enums.Colors> m_currentPieces;
 
             public TileInfo(int red, int blue, int yellow, int green, bool safeTile= false)
             {
@@ -58,7 +56,7 @@ namespace Ludo_MasterServer
                 m_greenID = green;
 
                 m_safeTile = safeTile;
-                m_currentPieces = new List<Colors>();
+				m_currentPieces = new List<Enums.Colors>();
             }
         }
         #endregion
@@ -70,14 +68,14 @@ namespace Ludo_MasterServer
 
         public void SetUp()
         {
-            m_matchState = MatchState.starting;
+			m_matchState = Enums.MatchState.starting;
 
             List<PlayerInfo> l_ListToSend = new List<PlayerInfo>();
             for (int i = 0; i < m_clientList.Count; i++)
             {
                 PlayerInfo l_pi = new PlayerInfo();
                 l_pi.m_name = m_clientList[i].m_name;
-                l_pi.m_color = (Colors)i;
+				l_pi.m_color = (Enums.Colors)i;
                 l_pi.m_id = m_clientList[i].m_id;
                 l_pi.m_client = m_clientList[i];
                 l_pi.m_currentTurn = (i == 0);
@@ -108,13 +106,13 @@ namespace Ludo_MasterServer
             {
                 if (m_clientList[i] != null)
                 {
-                    NetworkMessage l_message2 = MessageConstructor.ChangeTurn((Colors)0, (int)l_ListToSend[i].m_color == 0);
+					NetworkMessage l_message2 = MessageConstructor.ChangeTurn((Enums.Colors)0, (int)l_ListToSend[i].m_color == 0);
                     m_clientList[i].Send(l_message2);
 
                     m_playersPerID[m_clientList[i].m_id].m_rollResults.Clear();
                 }
             }
-            m_matchState = MatchState.rolling;
+			m_matchState = Enums.MatchState.rolling;
         }
 
         public void OnRollDice(Client client)
@@ -143,13 +141,13 @@ namespace Ludo_MasterServer
             else
                 client.Send(MessageConstructor.ChoosePiece());
 
-            m_matchState = MatchState.selectingPiece;
+			m_matchState = Enums.MatchState.selectingPiece;
         }
         public void OnSelectPiece(Client currentTurnClient, int originID)
         {
             NetworkMessage l_choosePieceMessage = MessageConstructor.ChoosePiece();
 
-            Colors l_color = m_playersPerID[currentTurnClient.m_id].m_color;
+			Enums.Colors l_color = m_playersPerID[currentTurnClient.m_id].m_color;
             TileInfo l_originTile = GetTileByColorAndID(l_color, originID);
             int l_rollResult = m_playersPerID[currentTurnClient.m_id].m_rollResults.Last();
             int l_destID = -1;
@@ -215,7 +213,7 @@ namespace Ludo_MasterServer
                         if (l_destTile.m_currentPieces[i] != l_color)
                         {
                             //Kill Enemy piece
-                            Colors l_enemyPieceColor = l_destTile.m_currentPieces[i];
+							Enums.Colors l_enemyPieceColor = l_destTile.m_currentPieces[i];
                             MovePiece(currentTurnClient, l_enemyPieceColor, GetTileIDByColor(l_destTile, l_enemyPieceColor), 0);
 
                             //Make player move 10 tiles
@@ -244,7 +242,7 @@ namespace Ludo_MasterServer
             Console.WriteLine("player {0}| origin {1}| dest {2}", currentTurnClient.m_name, originID, l_destID);
         }
 
-        private void ChangePlayerTurn(Client playerClient, Colors playerColor)
+		private void ChangePlayerTurn(Client playerClient, Enums.Colors playerColor)
         {
             if (m_completedPlayers.Count >= 3)
             {
@@ -254,15 +252,15 @@ namespace Ludo_MasterServer
 
             bool l_checkingNextPlayer = true;
             int l_index = 1;
-            Colors l_nextTurnColor = (Colors)((int)playerColor + l_index);
+			Enums.Colors l_nextTurnColor = (Enums.Colors)((int)playerColor + l_index);
 
             while (l_checkingNextPlayer)
             {
-                l_nextTurnColor = (Colors)((int)playerColor + l_index);
+				l_nextTurnColor = (Enums.Colors)((int)playerColor + l_index);
                 if ((int)l_nextTurnColor >= 4)
                 {
                     l_index = 0;
-                    l_nextTurnColor = (Colors)l_index;
+					l_nextTurnColor = (Enums.Colors)l_index;
                 }
 
                 if (m_completedPlayers.Contains(GetPlayerByColor(l_nextTurnColor)))
@@ -294,10 +292,10 @@ namespace Ludo_MasterServer
             }
             m_playersPerID[playerClient.m_id].m_rollResults.Clear();
 
-            m_matchState = MatchState.rolling;
+			m_matchState = Enums.MatchState.rolling;
         }
 
-        private void MovePiece(Client currentTurnClient, Colors color, int originID, int destID)
+		private void MovePiece(Client currentTurnClient, Enums.Colors color, int originID, int destID)
         {
             TileInfo l_originTile = GetTileByColorAndID(color, originID);
             TileInfo l_destTile = GetTileByColorAndID(color, destID);
@@ -353,45 +351,45 @@ namespace Ludo_MasterServer
                 m_clientList[i].Send(l_message);
 
             Program.m_gameManager.EndMatch(m_roomID);
-            m_matchState = MatchState.ended;
+			m_matchState = Enums.MatchState.ended;
         }
         #region TileManagement
-        public TileInfo GetTileByColorAndID(Colors pieceColor, int ID)
+		public TileInfo GetTileByColorAndID(Enums.Colors pieceColor, int ID)
         {
             TileInfo l_tile = new TileInfo(-1, -1, -1, -1);
             switch (pieceColor)
             {
-                case Colors.red:
+				case Enums.Colors.red:
                     l_tile = m_tiles.First(x => x.m_redID == ID);
                     break;
-                case Colors.blue:
+				case Enums.Colors.blue:
                     l_tile = m_tiles.First(x => x.m_blueID == ID);
                     break;
-                case Colors.green:
+				case Enums.Colors.green:
                     l_tile = m_tiles.First(x => x.m_greenID == ID);
                     break;
-                case Colors.yellow:
+				case Enums.Colors.yellow:
                     l_tile = m_tiles.First(x => x.m_yellowID == ID);
                     break;
             }
 
             return l_tile;
         }
-        public int GetTileIDByColor(TileInfo tile, Colors color)
+		public int GetTileIDByColor(TileInfo tile, Enums.Colors color)
         {
             int l_tileID = -1;
             switch (color)
             {
-                case Colors.red:
+				case Enums.Colors.red:
                     l_tileID = tile.m_redID;
                     break;
-                case Colors.blue:
+				case Enums.Colors.blue:
                     l_tileID = tile.m_blueID;
                     break;
-                case Colors.green:
+				case Enums.Colors.green:
                     l_tileID = tile.m_greenID;
                     break;
-                case Colors.yellow:
+				case Enums.Colors.yellow:
                     l_tileID = tile.m_yellowID;
                     break;
             }
@@ -399,7 +397,7 @@ namespace Ludo_MasterServer
             return l_tileID;
         }
 
-        public PlayerInfo GetPlayerByColor(Colors color)
+		public PlayerInfo GetPlayerByColor(Enums.Colors color)
         {
             return PlayerInfoList().FirstOrDefault(x => x.m_color == color);
         }
