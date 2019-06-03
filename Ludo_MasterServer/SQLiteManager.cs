@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Data.SQLite;
 using System.IO;
 
@@ -56,9 +57,14 @@ namespace Ludo_MasterServer
             SQLiteCommand l_command = new SQLiteCommand(query, m_connection);
             l_command.ExecuteNonQuery();
 
-            //string query2 = "CREATE TABLE clients (id INTEGER PRIMARY KEY AUTOINCREMENT,name  TEXT,password  TEXT,score INTEGER DEFAULT 0)";
-            //SQLiteCommand l_command2 = new SQLiteCommand(query2, m_connection);
-            //l_command2.ExecuteNonQuery();
+            string query2 = "CREATE TABLE matchs (id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                "date  TEXT,id_red INTEGER, id_blue   INTEGER, " +
+                "id_green  INTEGER,id_yellow INTEGER, " +
+                "id_first  INTEGER,id_second INTEGER, " +
+                "id_third  INTEGER,id_fourth INTEGER)";
+
+            SQLiteCommand l_command2 = new SQLiteCommand(query2, m_connection);
+            l_command2.ExecuteNonQuery();
 
             CloseConnection();
         }
@@ -260,6 +266,31 @@ namespace Ludo_MasterServer
 
             CloseConnection();
             return l_list;
+        }
+
+        public void AddMatch(List<GameServer.PlayerInfo> players)
+        {
+            OpenConnection();
+
+            string query = "INSERT INTO matchs ('date', 'id_red', 'id_blue', 'id_green', 'id_yellow', 'id_first', 'id_second', 'id_third', 'id_fourth') " +
+                            "VALUES (@date, @id_red, @id_blue,@id_green,@id_yellow,@id_first,@id_second,@id_third,@id_fourth)";
+
+            SQLiteCommand l_command = new SQLiteCommand(query, m_connection);
+            l_command.Parameters.AddWithValue("@date", String.Format( "dd/MM/yy HH:mm", DateTime.Now));
+
+            l_command.Parameters.AddWithValue("@id_red", players.Find(x=> x.m_color == Enums.Colors.red).m_id);
+            l_command.Parameters.AddWithValue("@id_blue", players.Find(x => x.m_color == Enums.Colors.blue).m_id);
+            l_command.Parameters.AddWithValue("@id_green", players.Find(x => x.m_color == Enums.Colors.green).m_id);
+            l_command.Parameters.AddWithValue("@id_yellow", players.Find(x => x.m_color == Enums.Colors.yellow).m_id);
+
+            l_command.Parameters.AddWithValue("@id_first", players[0].m_id);
+            l_command.Parameters.AddWithValue("@id_second", players[1].m_id);
+            l_command.Parameters.AddWithValue("@id_third", players[2].m_id);
+            l_command.Parameters.AddWithValue("@id_fourth", players[3].m_id);
+
+            var result = l_command.ExecuteNonQuery();
+
+            CloseConnection();
         }
     }
 }

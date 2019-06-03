@@ -337,6 +337,15 @@ namespace Ludo_MasterServer
 
         private void EndMatch()
         {
+            //Add last player to completed
+            foreach (var player in m_playersPerID)
+            {
+                if (!m_completedPlayers.Contains(player.Value))
+                    m_completedPlayers.Add(player.Value);
+            }
+
+            Program.m_server.m_database.AddMatch(m_completedPlayers);
+
             Console.WriteLine("GAME WITH ID {0} ENDED!", m_roomID);
 
             NetworkMessage l_message = MessageConstructor.EndMatch(4);
